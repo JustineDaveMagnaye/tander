@@ -3,6 +3,7 @@ import { useFormikContext } from "formik";
 import React, { useState } from "react";
 import {
   Alert,
+  Animated,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +13,7 @@ import {
 import PhotoUploadSection from "../../components/registration/PhotoUploadSection";
 import ProgressBar from "../../components/ui/ProgressBar";
 import colors from "../../config/colors";
+import { useSlideUp } from "../../hooks/useFadeIn";
 import { Step2Nav } from "../../navigation/NavigationTypes";
 
 interface Props {
@@ -33,6 +35,12 @@ export default function Step2Upload({ navigation }: Props) {
   const [seniorCitizenId, setSeniorCitizenId] = useState<string[]>(
     values.seniorCitizenId || Array(3).fill("")
   );
+
+  // Animations
+  const stepTextAnim = useSlideUp(400, 0, 20);
+  const photoCardAnim = useSlideUp(500, 100, 30);
+  const idCardAnim = useSlideUp(500, 200, 30);
+  const bottomNavAnim = useSlideUp(600, 300, 40);
 
   // Validate before proceeding
   const validateAndProceed = () => {
@@ -92,35 +100,64 @@ export default function Step2Upload({ navigation }: Props) {
         {/* Progress Bar */}
         <ProgressBar step={2} total={3} />
 
-        {/* Step Indicator */}
-        <Text style={styles.stepText}>Step 2 of 3</Text>
+        {/* ANIMATED Step Indicator */}
+        <Animated.View
+          style={{
+            opacity: stepTextAnim.opacity,
+            transform: [{ translateY: stepTextAnim.translateY }],
+          }}
+        >
+          <Text style={styles.stepText}>Step 2 of 3</Text>
+        </Animated.View>
 
-        {/* Upload Photos Section */}
-        <PhotoUploadSection
-          title="Upload Photos"
-          helperText="Add at least 2 photos to continue"
-          photos={photos}
-          onPhotosChange={handlePhotosChange}
-          maxPhotos={6}
-          columns={3}
-        />
+        {/* ANIMATED Upload Photos Section */}
+        <Animated.View
+          style={{
+            opacity: photoCardAnim.opacity,
+            transform: [{ translateY: photoCardAnim.translateY }],
+          }}
+        >
+          <PhotoUploadSection
+            title="Upload Photos"
+            helperText="Add at least 2 photos to continue"
+            photos={photos}
+            onPhotosChange={handlePhotosChange}
+            maxPhotos={6}
+            columns={3}
+          />
+        </Animated.View>
 
-        {/* Upload Senior Citizen ID Section */}
-        <PhotoUploadSection
-          title="Upload Senior Citizen ID"
-          helperText="Add at least 2 front and back of id"
-          photos={seniorCitizenId}
-          onPhotosChange={handleIdPhotosChange}
-          maxPhotos={3}
-          columns={3}
-        />
+        {/* ANIMATED Upload Senior Citizen ID Section */}
+        <Animated.View
+          style={{
+            opacity: idCardAnim.opacity,
+            transform: [{ translateY: idCardAnim.translateY }],
+          }}
+        >
+          <PhotoUploadSection
+            title="Upload Senior Citizen ID"
+            helperText="Add at least 2 front and back of id"
+            photos={seniorCitizenId}
+            onPhotosChange={handleIdPhotosChange}
+            maxPhotos={3}
+            columns={3}
+          />
+        </Animated.View>
 
         {/* Spacer for bottom navigation */}
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
+      {/* ANIMATED Bottom Navigation */}
+      <Animated.View
+        style={[
+          styles.bottomNav,
+          {
+            opacity: bottomNavAnim.opacity,
+            transform: [{ translateY: bottomNavAnim.translateY }],
+          },
+        ]}
+      >
         {/* Back Button */}
         <TouchableOpacity
           style={styles.backButton}
@@ -148,7 +185,7 @@ export default function Step2Upload({ navigation }: Props) {
             color={canProceed ? colors.white : "#9CA3AF"}
           />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
     </View>
   );
 }
