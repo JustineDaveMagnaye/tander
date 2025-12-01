@@ -1,6 +1,7 @@
 import ProgressBar from "@/src/components/ui/ProgressBar";
 import { getErrorString } from "@/src/utility/helpers";
 import { useFormikContext } from "formik";
+import React from "react";
 import {
   Animated,
   Image,
@@ -13,8 +14,16 @@ import {
 
 import { Step1Nav } from "@/src/navigation/NavigationTypes";
 import { useSlideUp } from "../../hooks/useFadeIn";
+import DatePickerInput from "../../components/inputs/DatePickerInput";
+import PickerModal from "../../components/modals/PickerModal";
 import SelectField from "../../components/forms/SelectField";
 import TextInputField from "../../components/forms/TextInputField";
+import {
+  CIVIL_STATUS_OPTIONS,
+  COUNTRIES,
+  HOBBY_OPTIONS,
+  PHILIPPINES_CITIES,
+} from "../../constants/formData";
 
 interface Props {
   navigation: Step1Nav;
@@ -35,6 +44,47 @@ export default function Step1BasicInfo({ navigation }: Props) {
   const headerAnim = useSlideUp(500, 0, 30);
   const cardAnim = useSlideUp(600, 100, 40);
   const buttonAnim = useSlideUp(600, 200, 30);
+
+  // Picker modal states
+  const [countryPickerVisible, setCountryPickerVisible] = React.useState(false);
+  const [civilStatusPickerVisible, setCivilStatusPickerVisible] =
+    React.useState(false);
+  const [cityPickerVisible, setCityPickerVisible] = React.useState(false);
+  const [hobbyPickerVisible, setHobbyPickerVisible] = React.useState(false);
+
+  // Auto-calculate age from birthday
+  React.useEffect(() => {
+    if (values.birthday) {
+      const age = calculateAge(values.birthday);
+      if (age !== null && age !== values.age) {
+        setFieldValue("age", age.toString());
+      }
+    }
+  }, [values.birthday]);
+
+  const calculateAge = (dateString: string): number | null => {
+    if (!dateString) return null;
+
+    // Date format: MM/DD/YYYY
+    const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+    if (!dateRegex.test(dateString)) return null;
+
+    const [month, day, year] = dateString.split("/").map(Number);
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age >= 0 ? age : null;
+  };
 
   const handleNext = async () => {
     const validationErrors = await validateForm();
@@ -100,7 +150,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
         {/* FIRST NAME */}
         <TextInputField
           label="First Name"
-          placeholder="Enter your first name"
+          placeholder="Enter your name"
           value={values.firstName}
           touched={!!touched.firstName}
           error={getErrorString(errors.firstName)}
@@ -111,7 +161,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
         {/* LAST NAME */}
         <TextInputField
           label="Last Name"
-          placeholder="Enter your last name"
+          placeholder="Enter your name"
           value={values.lastName}
           touched={!!touched.lastName}
           error={getErrorString(errors.lastName)}
@@ -133,28 +183,24 @@ export default function Step1BasicInfo({ navigation }: Props) {
         {/* BIRTHDAY + AGE (2-column layout) */}
         <View style={styles.row}>
           <View style={styles.col}>
-            <TextInputField
+            <DatePickerInput
               label="Birthday"
-              placeholder="MM/DD/YYYY"
+              placeholder="mm/dd/yyyy"
               value={values.birthday}
               touched={!!touched.birthday}
               error={getErrorString(errors.birthday)}
-              onChangeText={(t) => setFieldValue("birthday", t)}
+              onChangeText={(date) => setFieldValue("birthday", date)}
               onBlur={() => setFieldTouched("birthday", true)}
             />
           </View>
 
           <View style={styles.col}>
-            <TextInputField
-              label="Age"
-              placeholder="Age"
-              value={values.age}
-              touched={!!touched.age}
-              error={getErrorString(errors.age)}
-              keyboardType="numeric"
-              onChangeText={(t) => setFieldValue("age", t)}
-              onBlur={() => setFieldTouched("age", true)}
-            />
+            <View style={styles.ageContainer}>
+              <Text style={styles.label}>Age</Text>
+              <View style={styles.ageDisplay}>
+                <Text style={styles.ageText}>{values.age || ""}</Text>
+              </View>
+            </View>
           </View>
         </View>
 
@@ -163,11 +209,11 @@ export default function Step1BasicInfo({ navigation }: Props) {
           <View style={styles.col}>
             <SelectField
               label="Country"
-              placeholder="Select country"
+              placeholder="Phil"
               value={values.country}
               touched={!!touched.country}
               error={getErrorString(errors.country)}
-              onPress={() => console.log("Open Country Picker")}
+              onPress={() => setCountryPickerVisible(true)}
             />
           </View>
 
@@ -178,7 +224,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
               value={values.civilStatus}
               touched={!!touched.civilStatus}
               error={getErrorString(errors.civilStatus)}
-              onPress={() => console.log("Open Civil Status Picker")}
+              onPress={() => setCivilStatusPickerVisible(true)}
             />
           </View>
         </View>
@@ -188,11 +234,11 @@ export default function Step1BasicInfo({ navigation }: Props) {
           <View style={styles.col}>
             <SelectField
               label="City/Province"
-              placeholder="Select city"
+              placeholder=""
               value={values.city}
               touched={!!touched.city}
               error={getErrorString(errors.city)}
-              onPress={() => console.log("Open City Picker")}
+              onPress={() => setCityPickerVisible(true)}
             />
           </View>
 
@@ -203,7 +249,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
               value={values.hobby}
               touched={!!touched.hobby}
               error={getErrorString(errors.hobby)}
-              onPress={() => console.log("Open Hobby Picker")}
+              onPress={() => setHobbyPickerVisible(true)}
             />
           </View>
         </View>
@@ -224,6 +270,59 @@ export default function Step1BasicInfo({ navigation }: Props) {
           <Text style={styles.nextText}>Next  ›</Text>
         </TouchableOpacity>
       </Animated.View>
+
+      {/* PICKER MODALS */}
+      <PickerModal
+        visible={countryPickerVisible}
+        title="Select Country"
+        options={COUNTRIES}
+        selectedValue={values.country}
+        onSelect={(value) => {
+          setFieldValue("country", value);
+          setFieldTouched("country", true);
+        }}
+        onClose={() => setCountryPickerVisible(false)}
+        searchPlaceholder="Search country..."
+      />
+
+      <PickerModal
+        visible={civilStatusPickerVisible}
+        title="Select Civil Status"
+        options={CIVIL_STATUS_OPTIONS}
+        selectedValue={values.civilStatus}
+        onSelect={(value) => {
+          setFieldValue("civilStatus", value);
+          setFieldTouched("civilStatus", true);
+        }}
+        onClose={() => setCivilStatusPickerVisible(false)}
+        enableSearch={false}
+      />
+
+      <PickerModal
+        visible={cityPickerVisible}
+        title="Select City/Province"
+        options={PHILIPPINES_CITIES}
+        selectedValue={values.city}
+        onSelect={(value) => {
+          setFieldValue("city", value);
+          setFieldTouched("city", true);
+        }}
+        onClose={() => setCityPickerVisible(false)}
+        searchPlaceholder="Search city..."
+      />
+
+      <PickerModal
+        visible={hobbyPickerVisible}
+        title="Select Hobby"
+        options={HOBBY_OPTIONS}
+        selectedValue={values.hobby}
+        onSelect={(value) => {
+          setFieldValue("hobby", value);
+          setFieldTouched("hobby", true);
+        }}
+        onClose={() => setHobbyPickerVisible(false)}
+        searchPlaceholder="Search hobby..."
+      />
     </ScrollView>
   );
 }
@@ -267,6 +366,30 @@ const styles = StyleSheet.create({
 
   col: {
     flex: 1,
+  },
+
+  // Age display styles
+  ageContainer: {
+    marginBottom: 18,
+  },
+  label: {
+    fontWeight: "600",
+    marginBottom: 6,
+    fontSize: 14,
+    color: "#333",
+  },
+  ageDisplay: {
+    backgroundColor: "#F5F5F5",
+    borderWidth: 1.5,
+    borderColor: "#E5E5E5",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    justifyContent: "center",
+  },
+  ageText: {
+    fontSize: 16,
+    color: "#333",
   },
 
   nextBtn: {
