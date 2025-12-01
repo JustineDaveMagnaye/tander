@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import { Step1Nav } from "@/src/navigation/NavigationTypes";
-import { useSlideUp, useStaggerAnimation } from "../../hooks/useFadeIn";
+import { useSlideUp } from "../../hooks/useFadeIn";
 import SelectField from "../../components/forms/SelectField";
 import TextInputField from "../../components/forms/TextInputField";
 
@@ -100,6 +100,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
         {/* FIRST NAME */}
         <TextInputField
           label="First Name"
+          placeholder="Enter your first name"
           value={values.firstName}
           touched={!!touched.firstName}
           error={getErrorString(errors.firstName)}
@@ -110,6 +111,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
         {/* LAST NAME */}
         <TextInputField
           label="Last Name"
+          placeholder="Enter your last name"
           value={values.lastName}
           touched={!!touched.lastName}
           error={getErrorString(errors.lastName)}
@@ -120,6 +122,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
         {/* NICKNAME */}
         <TextInputField
           label="Nick Name"
+          placeholder="Enter your nickname"
           value={values.nickName}
           touched={!!touched.nickName}
           error={getErrorString(errors.nickName)}
@@ -144,6 +147,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
           <View style={styles.col}>
             <TextInputField
               label="Age"
+              placeholder="Age"
               value={values.age}
               touched={!!touched.age}
               error={getErrorString(errors.age)}
@@ -159,7 +163,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
           <View style={styles.col}>
             <SelectField
               label="Country"
-              placeholder="Select..."
+              placeholder="Select country"
               value={values.country}
               touched={!!touched.country}
               error={getErrorString(errors.country)}
@@ -184,7 +188,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
           <View style={styles.col}>
             <SelectField
               label="City/Province"
-              placeholder="Select..."
+              placeholder="Select city"
               value={values.city}
               touched={!!touched.city}
               error={getErrorString(errors.city)}
@@ -217,7 +221,7 @@ export default function Step1BasicInfo({ navigation }: Props) {
           onPress={handleNext}
           activeOpacity={0.85}
         >
-          <Text style={styles.nextText}>Next</Text>
+          <Text style={styles.nextText}>Next  ›</Text>
         </TouchableOpacity>
       </Animated.View>
     </ScrollView>
