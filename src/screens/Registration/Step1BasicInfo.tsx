@@ -65,7 +65,6 @@ export default function Step1BasicInfo({ navigation }: Props) {
   const calculateAge = (dateString: string): number | null => {
     if (!dateString) return null;
 
-    // Date format: MM/DD/YYYY
     const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
     if (!dateRegex.test(dateString)) return null;
 
@@ -368,7 +367,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Age display styles
   ageContainer: {
     marginBottom: 18,
   },
